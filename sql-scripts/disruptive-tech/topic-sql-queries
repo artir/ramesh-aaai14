@@ -1,0 +1,29 @@
+create table poststopic as select p.id, user_id, forum_id, thread_id, post_text from forum_posts p JOIN forum_threads t ON p.thread_id = t.id JOIN hash_mapping h ON p.forum_user_id = h.forum_user_id;
+
+update posttopic set post_text = replace(post_text, '\r\n', '');
+-- sample posts from each forum
+
+drop procedure IF EXISTS GetItems;
+DELIMITER //
+CREATE PROCEDURE GetItems()
+    BEGIN
+    SET @v_max := 32;
+    SET @v_counter := 2;
+    WHILE @v_counter < @v_max do
+    SELECT @total := count(*) FROM forum_posts p JOIN forum_threads f ON p.thread_id = f.id where forum_id = @v_counter;
+    SET @file = CONCAT('/tmp/postsample_2', CAST(@v_counter AS CHAR), '.txt');
+    SELECT @file;
+    SET @sql = CONCAT("SELECT p.id, p.user_id, forum_id, thread_id, post_text INTO OUTFILE '",@file,"' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' FROM poststopic p where forum_id = @v_counter LIMIT 0,", FLOOR(0.1*@total));
+    SELECT @sql;
+    SET @v_counter=@v_counter+1;
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    end WHILE;
+    END //
+DELIMITER ;
+
+cat > 
+
+Run eclipse program to remove html breaks
+
+

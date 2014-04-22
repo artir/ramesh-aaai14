@@ -1,0 +1,218 @@
+Gene and human data class notes:
+
+Total users:  80704
+Total number of posts: 7190
+
+Learners participated in forums : 3521
+Learners having a > 0 score : 18465
+
+
++-------------------------------------------+
+| Tables_in_gene                            |
++-------------------------------------------+
+| access_groups                             |
+| activity_log                              |
+| announcements                             |
+| assignment_metadata                       |
+| assignment_part_metadata                  |
+| assignment_submission_metadata            |
+| course_grades                             |
+| forum_comments                            |
+| forum_forums                              |
+| forum_posts                               |
+| forum_reporting                           |
+| forum_reputation_points                   |
+| forum_reputation_record                   |
+| forum_subscribe_forums                    |
+| forum_subscribe_threads                   |
+| forum_tags                                |
+| forum_tags_threads                        |
+| forum_threads                             |
+| hash_mapping                              |
+| hg_assessment_calibration_gradings        |
+| hg_assessment_evaluation_metadata         |
+| hg_assessment_metadata                    |
+| hg_assessment_overall_evaluation_metadata |
+| hg_assessment_peer_grading_metadata       |
+| hg_assessment_peer_grading_set_metadata   |
+| hg_assessment_self_grading_set_metadata   |
+| hg_assessment_submission_metadata         |
+| hg_assessment_training_metadata           |
+| hg_assessment_training_set_metadata       |
+| items_sections                            |
+| kvs_course.970365.assignment.data         |
+| kvs_course.970365.assignment.submissions  |
+| kvs_course.970365.forum_readrecord        |
+| kvs_course.970365.human_grading           |
+| kvs_course.970365.lecture                 |
+| kvs_course.970365.quiz                    |
+| kvs_course.970365.wiki                    |
+| late_days_applied                         |
+| late_days_left                            |
+| lecture_metadata                          |
+| lecture_submission_metadata               |
+| navbar_list                               |
+| quiz_metadata                             |
+| quiz_submission_metadata                  |
+| sections                                  |
+| users                                     |
+| wiki_pages                                |
+| wiki_revisions                            |
++-------------------------------------------+
+
+postActivity(U) (median):
+
+ INTO OUTFILE '/tmp/postActivityTrue1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'
+
+select d.user_id, "1.0" as truth from (select user_id, count(*) as count from forum_posts f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id group by user_id having count > (select count from (select CEIL(COUNT(*)/2), count from (select user_id, count(*) as count from forum_posts f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id group by user_id order by count) a) b)) d JOIN hash_mapping h ON d.user_id = h.user_id JOIN course_grades cg ON h.anon_user_id = cg.anon_user_id WHERE cg.normal_grade > 0;
+
+
+select user_id, "0.0" as truth INTO OUTFILE '/tmp/postActivityFalse1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, count(*) as count from forum_posts f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id group by user_id having count <= (select count from (select CEIL(COUNT(*)/2), count from (select user_id, count(*) as count from forum_posts f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id group by user_id order by count) a) b)) d;
+
+select max(count) as med from (select user_id, count(*) as count from forum_posts f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id group by user_id order by count limit 705) a order by count limit 705 
+
+voteActivity(U) :
+
+select user_id, "1.0" as truth INTO OUTFILE '/tmp/voteActivityTrue.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, count(*) as count_1 from activity_log a JOIN hash_mapping h ON a.forum_user_id = h.forum_user_id where action in ("upvote", "downvote") group by user_id having count_1 > (select count from (select CEIL(COUNT(*)/2), count from (select user_id, count(*) as count from activity_log f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id where action in ("upvote", "downvote") group by user_id order by count) a) b)) d;
+
+select user_id, "0.0" as truth INTO OUTFILE '/tmp/voteActivityFalse.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, count(*) as count_1 from activity_log a JOIN hash_mapping h ON a.forum_user_id = h.forum_user_id where action in ("upvote", "downvote") group by user_id having count_1 <= (select count from (select CEIL(COUNT(*)/2), count from (select user_id, count(*) as count from activity_log f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id where action in ("upvote", "downvote") group by user_id order by count) a) b)) d;
+
+viewActivity(U) : 
+
+create table user_view as (select SUBSTRING(`key`, INSTR(`key`, '.')+1) as user_id, SUBSTR(`value`, INSTR(`value`, 'i:13')+2, 10)  from `kvs_course.970365.forum_readrecord`);
+
+select SUBSTR(`value`, INSTR(`value`, 'i:13')+2, 10) from `kvs_course.970365.forum_readrecord`;
+select SUBSTR(`key`, INSTR(`key`, '.')+1) from `kvs_course.970365.forum_readrecord`;
+
+(select count from (select CEIL(COUNT(*)/2), count from (select user_id, count(*) as count from forum_posts f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id group by user_id order by count) a) b)
+
+
+select avg(count) from (select forum_user_id, count(*) as count from user_view where date > str_to_date('19/04/2013', '%d/%m/%Y') AND date < str_to_date('05/05/2013', '%d/%m/%Y') group by forum_user_id order by count) a;
+
+
+
+select forum_user_id, "1.0" as truth INTO OUTFILE '/tmp/viewActivityTemporalTrue3.txt' FIELDS TERMINATED BY '\\t' LINES TERMINATED BY '\\n' from (select user_id, count(*) as count_1 from user_view group by forum_user_id having count_1 > ;
+
+select user_id, "1.0" as truth INTO OUTFILE '/tmp/viewActivityTrue.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, count(*) as count_1 from user_view group by user_id having count_1 > (select count from (select CEIL(COUNT(*)/2), count from (select user_id, count(*) as count from user_view group by user_id order by count) a) b)) d;
+
+select user_id, "0.0" as truth INTO OUTFILE '/tmp/viewActivityFalse.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, count(*) as count_1 from user_view group by user_id having count_1 <= (select count from (select CEIL(COUNT(*)/2), count from (select user_id, count(*) as count from user_view group by user_id order by count) a) b)) d;
+
+reputation(U) :
+
+select user_id, "1.0" as truth INTO OUTFILE '/tmp/reputationTrue.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_reputation_points f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id where points > (select avg(points) from forum_reputation_points);
+
+select user_id, "0.0" as truth INTO OUTFILE '/tmp/reputationFalse.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_reputation_points f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id where points < (select avg(points) from forum_reputation_points)
+
+deadlines:
+
+select count(distinct item_id) from quiz_submission_metadata;
+
+44 deadlines in all
+
+select user_id, ontimeCount/44 as perc  INTO OUTFILE '/tmp/ontime.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, CAST(count(*) AS DECIMAL(10,5)) AS ontimeCount from (select user_id, item_id, count(*) as count from quiz_metadata qm JOIN quiz_submission_metadata qsm ON qm.id = qsm.item_id JOIN hash_mapping hm ON qsm.anon_user_id = hm.anon_user_id where DATE(FROM_UNIXTIME(submission_time))  <= DATE(FROM_UNIXTIME(hard_close_time)) group by user_id, item_id) a group by user_id) b;
+
+ 
+select user_id, ontimeCount/44 as perc  INTO OUTFILE '/tmp/submitted.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, CAST(count(*) AS DECIMAL(10,5)) AS ontimeCount from (select user_id, item_id, count(*) as count from quiz_metadata qm JOIN quiz_submission_metadata qsm ON qm.id = qsm.item_id JOIN hash_mapping hm ON qsm.anon_user_id = hm.anon_user_id group by user_id, item_id) a group by user_id) b;
+
+posts(U):
+
+select user_id, id INTO OUTFILE '/tmp/posts.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_posts f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id;
+
+
+votes(U):
+
+select forum_user_id, id INTO OUTFILE '/tmp/votes.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_posts;
+
+
+subscribeThreads(U) and subscribeForums(U):
+
+select user_id, thread_id INTO OUTFILE '/tmp/subscribe1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_subscribe_threads f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id;
+
+select user_id, forum_id INTO OUTFILE '/tmp/subscribeForums.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_subscribe_forums f JOIN hash_mapping h ON f.forum_user_id = h.forum_user_id;
+
+inThread(post, thread):
+
+select id, thread_id INTO OUTFILE '/tmp/inThread.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_posts;
+
+inForum(thread, forum):
+
+select id, forum_id INTO OUTFILE '/tmp/inForum.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_threads;
+
+
+select id INTO OUTFILE '/tmp/upvote.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_posts where votes > 0;
+
+select id INTO OUTFILE '/tmp/downvote.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from forum_posts where votes < 0;
+
+performance(U):
+
+INTO OUTFILE '/tmp/performanceTrueTrimmed.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'
+
+select user_id, "1.0" as truth INTO OUTFILE '/tmp/performanceTrueTrimmed.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from course_grades cg JOIN hash_mapping hm ON cg.anon_user_id = hm.anon_user_id where normal_grade >= 70
+
+(select avg(normal_grade) from course_grades where normal_grade != 0);
+
+select forum_user_id, "0.0" as truth INTO OUTFILE '/tmp/performanceFalseTrimmed.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from course_grades cg JOIN hash_mapping hm ON cg.anon_user_id = hm.anon_user_id where normal_grade < 70 AND normal_grade > 0;
+
+(select avg(normal_grade) from course_grades where normal_grade != 0) AND normal_grade > 0;
+
+Dates:
+
+start:        - 01/16
+middle: 01/16 - 02/17
+end:    02/17 - 03/10 (end)
+
+01/16: assignment 1
+02/10: assignment 1a, 1b and 2
+02/17: assignment 3
+03/10: assignment 6
+
+lastQuiz(U, t):
+
+select user_id, "1" as period INTO OUTFILE '/tmp/lastQuiz1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select anon_user_id, MAX(DATE(FROM_UNIXTIME(submission_time))) maxsubtime from quiz_submission_metadata group by anon_user_id) a JOIN hash_mapping hm ON hm.anon_user_id = a.anon_user_id where maxsubtime <= str_to_date('05/05/2013', '%d/%m/%Y');
+
+select user_id, "2" as period INTO OUTFILE '/tmp/lastQuiz2.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select anon_user_id, MAX(DATE(FROM_UNIXTIME(submission_time))) maxsubtime from quiz_submission_metadata group by anon_user_id) a JOIN hash_mapping hm ON hm.anon_user_id = a.anon_user_id where maxsubtime > str_to_date('05/05/2013', '%d/%m/%Y') AND maxsubtime <= str_to_date('19/05/2013', '%d/%m/%Y');
+
+select user_id, "3" as period INTO OUTFILE '/tmp/lastQuiz3.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select anon_user_id, MAX(DATE(FROM_UNIXTIME(submission_time))) maxsubtime from quiz_submission_metadata group by anon_user_id) a JOIN hash_mapping hm ON hm.anon_user_id = a.anon_user_id where maxsubtime > str_to_date('19/05/2013', '%d/%m/%Y') AND maxsubtime <= str_to_date('02/06/2013', '%d/%m/%Y');
+
+lastLecture(U, t):
+
+
+select user_id, "1" as period INTO OUTFILE '/tmp/lastLecture1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select anon_user_id, MAX(DATE(FROM_UNIXTIME(submission_time))) maxsubtime from lecture_submission_metadata group by anon_user_id) a JOIN hash_mapping hm ON hm.anon_user_id = a.anon_user_id where maxsubtime <= str_to_date('05/05/2013', '%d/%m/%Y');
+
+select user_id, "2" as period INTO OUTFILE '/tmp/lastLecture2.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select anon_user_id, MAX(DATE(FROM_UNIXTIME(submission_time))) maxsubtime from lecture_submission_metadata group by anon_user_id) a JOIN hash_mapping hm ON hm.anon_user_id = a.anon_user_id where maxsubtime > str_to_date('05/05/2013', '%d/%m/%Y') AND maxsubtime <= str_to_date('19/05/2013', '%d/%m/%Y');
+
+select user_id, "3" as period INTO OUTFILE '/tmp/lastLecture3.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select anon_user_id, MAX(DATE(FROM_UNIXTIME(submission_time))) maxsubtime from lecture_submission_metadata group by anon_user_id) a JOIN hash_mapping hm ON hm.anon_user_id = a.anon_user_id where maxsubtime > str_to_date('19/05/2013', '%d/%m/%Y');
+//AND maxsubtime <= str_to_date('02/06/2013', '%d/%m/%Y');
+
+lastView(U, t)
+
+select user_id, "1" as period INTO OUTFILE '/tmp/lastView1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(timestamp))) maxsubtime from user_view group by user_id) a where maxsubtime <= str_to_date('05/05/2013', '%d/%m/%Y');
+
+
+select user_id, "2" as period INTO OUTFILE '/tmp/lastView2.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(timestamp))) maxsubtime from user_view group by user_id) a where maxsubtime > str_to_date('05/05/2013', '%d/%m/%Y') AND maxsubtime <= str_to_date('19/05/2013', '%d/%m/%Y');
+
+
+select user_id, "3" as period INTO OUTFILE '/tmp/lastView3.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(timestamp))) maxsubtime from user_view group by user_id) a where maxsubtime > str_to_date('19/05/2013', '%d/%m/%Y');
+
+lastVote (U, t)
+
+select user_id, "1" as period INTO OUTFILE '/tmp/lastVote1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(timestamp))) maxsubtime from activity_log a JOIN hash_mapping hm ON a.forum_user_id = hm.forum_user_id where action IN ("upvote", "downvote") group by user_id) a where maxsubtime <= str_to_date('05/05/2013', '%d/%m/%Y');
+
+select user_id, "2" as period INTO OUTFILE '/tmp/lastVote2.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(timestamp))) maxsubtime from activity_log a JOIN hash_mapping hm ON a.forum_user_id = hm.forum_user_id where action IN ("upvote", "downvote") group by user_id) a where maxsubtime > str_to_date('05/05/2013', '%d/%m/%Y') AND maxsubtime <= str_to_date('19/05/2013', '%d/%m/%Y');
+
+select user_id, "3" as period INTO OUTFILE '/tmp/lastVote3.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(timestamp))) maxsubtime from activity_log a JOIN hash_mapping hm ON a.forum_user_id = hm.forum_user_id where action IN ("upvote", "downvote") group by user_id) a where maxsubtime > str_to_date('19/05/2013', '%d/%m/%Y');
+
+select forum_user_id, "4" as period INTO OUTFILE '/tmp/lastVote4.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select forum_user_id, MAX(DATE(FROM_UNIXTIME(timestamp))) maxsubtime from activity_log where action IN ("upvote", "downvote") group by forum_user_id) a where maxsubtime >= str_to_date('19/04/2013', '%d/%m/%Y');
+
+lastPost(U, t)
+
+select user_id, "1" as period INTO OUTFILE '/tmp/lastPost1.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(post_time))) maxsubtime from forum_posts f JOIN hash_mapping hm ON f.forum_user_id = hm.forum_user_id group by user_id) a where maxsubtime <= str_to_date('05/05/2013', '%d/%m/%Y');
+
+select user_id, "2" as period INTO OUTFILE '/tmp/lastPost2.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(post_time))) maxsubtime from forum_posts f JOIN hash_mapping hm ON f.forum_user_id = hm.forum_user_id group by user_id) a where maxsubtime > str_to_date('05/05/2013', '%d/%m/%Y') AND maxsubtime <= str_to_date('19/05/2013', '%d/%m/%Y');
+
+select user_id, "3" as period INTO OUTFILE '/tmp/lastPost3.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select user_id, MAX(DATE(FROM_UNIXTIME(post_time))) maxsubtime from forum_posts f JOIN hash_mapping hm ON f.forum_user_id = hm.forum_user_id group by user_id) a where maxsubtime >= str_to_date('19/04/2013', '%d/%m/%Y');
+
+
+
+
+

@@ -1,0 +1,102 @@
+//rules
+//post activity indicates performance
+m.add rule : ( postActivity(U) ) >> engagement_active(U),  weight : 5
+m.add rule : ( user(U) & ~postActivity(U) ) >> ~engagement_active(U),  weight : 5
+//vote activity indicates performance
+
+m.add rule : ( voteActivity(U) ) >> engagement_passive(U),  weight : 5
+m.add rule : ( user(U) & ~voteActivity(U) ) >> ~engagement_passive(U),  weight : 5
+
+//vote activity and post activity indicates performance
+
+m.add rule : ( viewActivity(U) ) >> engagement_passive(U),  weight : 5
+m.add rule : ( user(U) & ~viewActivity(U) ) >> ~engagement_passive(U),  weight : 5
+
+//all activity indicates performance
+//m.add rule : ( postActivity(U) & viewActivity(U) & voteActivity(U) ) >> performance(U),  weight : 5
+
+//reputation indicates performance
+m.add rule : ( engagement_active(U) & reputation(U) ) >> performance(U),  weight : 5
+m.add rule : ( engagement_active(U) & user(U) & ~reputation(U) ) >> ~performance(U),  weight : 5
+
+//posts positive stuff
+m.add rule : ( posts(U, P) ) >> engagement_active(U),  weight : 5
+m.add rule : ( posts(U, P) & polarity(P)) >> engagement_active(U),  weight : 5
+m.add rule : ( posts(U, P) & subjective(P)) >> engagement_active(U),  weight : 5
+m.add rule : ( posts(U, P) & post(P) & ~polarity(P)) >> ~engagement_active(U),  weight : 5
+
+//posts stuff that has positive votes
+m.add rule : ( posts(U, P) & upvote(P)) >> engagement_active(U),  weight : 5
+m.add rule : ( posts(U, P) & post(P) & ~upvote(P)) >> ~engagement_active(U),  weight : 5
+
+//posts stuff that has negative votes
+m.add rule : ( posts(U, P) & downvote(P) ) >> engagement_active(U),  weight : 3
+
+//temporal rules
+m.add rule : ( lastLecture(U, "2") ) >> disengagement(U),  weight : 10
+m.add rule : ( lastLecture(U, "3") ) >> disengagement(U),  weight : 10
+
+//ontime with the course
+m.add rule : ( engagement_passive(U) ) >> performance(U),  weight : 5
+m.add rule : ( engagement_active(U) ) >> performance(U),  weight : 5
+m.add rule : ( engagement_active(U) & engagement_passive(U)) >> performance(U),  weight : 5
+m.add rule : ( user(U) & ~engagement_active(U) & ~engagement_passive(U)) >> ~performance(U),  weight : 5
+m.add rule : ( user(U) & ~engagement_active(U) & engagement_passive(U)) >> ~performance(U),  weight : 5
+m.add rule : ( user(U) & ~engagement_active(U) ) >> ~performance(U), weight : 10
+m.add rule : ( user(U) & disengagement(U) ) >> ~performance(U), weight : 10
+
+m.add rule : ( user(U) & ~submitted(U) ) >> ~engagement_active(U),  weight : 10
+m.add rule : ( user(U) & ~ontime(U) ) >> ~engagement_active(U),  weight : 10
+
+m.add rule : ( submitted(U) ) >> engagement_active(U),  weight : 5
+m.add rule : ( ontime(U) ) >> engagement_active(U),  weight : 5
+
+Method , fold 0, auprc positive: 0.761455054220734, negative: 0.5961265040972168, auROC: 0.7049645390070921, kendall: 0.5919343814080656
+Method , fold 1, auprc positive: 0.802517199227282, negative: 0.7471812275544015, auROC: 0.7883841288096607, kendall: 0.653184165232358
+Method , fold 2, auprc positive: 0.8037481420263314, negative: 0.5498541817151168, auROC: 0.7186666666666663, kendall: 0.6117088607594936
+Method , fold 3, auprc positive: 0.8306336963622687, negative: 0.7105591690899815, auROC: 0.7962962962962962, kendall: 0.6420743116813686
+Method , fold 4, auprc positive: 0.6852017798700194, negative: 0.5086394481534708, auROC: 0.6150000000000001, kendall: 0.5523809523809524
+Method , fold 5, auprc positive: 0.7385594343158051, negative: 0.3821188457900919, auROC: 0.6051948051948053, kendall: 0.5577431677931237
+Method , fold 6, auprc positive: 0.7373421474654926, negative: 0.6485389148435414, auROC: 0.6902173913043479, kendall: 0.6126656848306333
+Method , fold 7, auprc positive: 0.7111208576019594, negative: 0.6569082998491993, auROC: 0.689177489177489, kendall: 0.6157646048109966
+Method , fold 8, auprc positive: 0.8363862809136549, negative: 0.583397985781989, auROC: 0.731162196679438, kendall: 0.6124008228034088
+Method , fold 9, auprc positive: 0.7769122890924075, negative: 0.515130627182416, auROC: 0.6842592592592595, kendall: 0.5902306648575305
+
+Method , auprc positive: (mean/variance) 0.7683876881095955  /  0.0023087225155912217
+Method , auprc negative: (mean/variance) 0.5898455204057426  /  0.010427608207595862
+Method , auROC: (mean/variance) 0.7023322772395055  /  0.0035048131383006997
+Method , kendall: (mean/variance) 0.6040087616557932  /  9.351629275057283E-4
+
+with quiz features
+
+Method , fold 0, auprc positive: 0.7633226309902585, negative: 0.5950554297513212, auROC: 0.7085106382978723, kendall: 0.5864661654135339
+Method , fold 1, auprc positive: 0.80410546663769, negative: 0.7486841954313473, auROC: 0.7912593444508337, kendall: 0.6394148020654045
+Method , fold 2, auprc positive: 0.8030666634256944, negative: 0.5368383086992436, auROC: 0.7159999999999997, kendall: 0.6186708860759493
+Method , fold 3, auprc positive: 0.8292241386647673, negative: 0.7285349060585175, auROC: 0.7903050108932463, kendall: 0.6394012296177493
+Method , fold 4, auprc positive: 0.6909176334136689, negative: 0.5215721294909722, auROC: 0.6199999999999999, kendall: 0.5826086956521739
+Method , fold 5, auprc positive: 0.7487895143146504, negative: 0.4002642686879744, auROC: 0.6142857142857142, kendall: 0.5518660005877167
+Method , fold 6, auprc positive: 0.7450882204283116, negative: 0.6547427807765617, auROC: 0.7035953177257525, kendall: 0.6158215863665053
+Method , fold 7, auprc positive: 0.7082914569073495, negative: 0.6677589680882126, auROC: 0.6878787878787878, kendall: 0.6217783505154639
+Method , fold 8, auprc positive: 0.8371474003860736, negative: 0.5265216165523944, auROC: 0.7298850574712643, kendall: 0.6326770496620628
+Method , fold 9, auprc positive: 0.78153267793903, negative: 0.5189320623486289, auROC: 0.690740740740741, kendall: 0.5712347354138398
+
+Method , auprc positive: (mean/variance) 0.7711485803107493  /  0.0021569703073861524
+Method , auprc negative: (mean/variance) 0.5898904665885174  /  0.010722445979945705
+Method , auROC: (mean/variance) 0.7052460611744211  /  0.0031422121738243214
+Method , kendall: (mean/variance) 0.6059939501370399  /  8.517664334264374E-4
+
+Method , fold 0, auprc positive: 0.761210779245186, negative: 0.5708680327701969, auROC: 0.7056737588652482, kendall: 0.5926179084073822
+Method , fold 1, auprc positive: 0.8164912357786607, negative: 0.7682851194196351, auROC: 0.8056354226566992, kendall: 0.6480206540447504
+Method , fold 2, auprc positive: 0.8039364757338862, negative: 0.558460494157339, auROC: 0.721333333333333, kendall: 0.5819620253164557
+Method , fold 3, auprc positive: 0.8289588256564289, negative: 0.7246032032792256, auROC: 0.7864923747276688, kendall: 0.6514300989040364
+Method , fold 4, auprc positive: 0.6612601646060422, negative: 0.5222795199903731, auROC: 0.6141666666666665, kendall: 0.5685300207039338
+Method , fold 5, auprc positive: 0.7444772561677658, negative: 0.38981191180981645, auROC: 0.611038961038961, kendall: 0.5468704084631208
+Method , fold 6, auprc positive: 0.7526929083192059, negative: 0.6715936488917856, auROC: 0.7115384615384617, kendall: 0.6212918156953503
+Method , fold 7, auprc positive: 0.7224300165727471, negative: 0.6620491414972072, auROC: 0.7056277056277054, kendall: 0.6222079037800687
+Method , fold 8, auprc positive: 0.8467294695160718, negative: 0.5434231072424248, auROC: 0.7471264367816093, kendall: 0.6126946811636791
+Method , fold 9, auprc positive: 0.7490379858108084, negative: 0.5379161270342645, auROC: 0.6824074074074072, kendall: 0.613749434644957
+
+Method , auprc positive: (mean/variance) 0.7687225117406803  /  0.0028215211682232066
+Method , auprc negative: (mean/variance) 0.5949290306092267  /  0.011241349846891457
+Method , auROC: (mean/variance) 0.7091040528643759  /  0.0036274873358397297
+Method , kendall: (mean/variance) 0.6059374951123735  /  0.0010088210995618518

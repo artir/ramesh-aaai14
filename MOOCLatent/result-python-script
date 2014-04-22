@@ -1,0 +1,34 @@
+filenames = ['results-disengagement0.val', 'results-disengagement1.val', 'results-disengagement2.val', 'results-disengagement3.val','results-disengagement4.val','results-disengagement5.val','results-disengagement6.val','results-disengagement7.val','results-disengagement8.val','results-disengagement9.val']
+with open('/linqshomes/artir/Doctorate/workspace/MOOCLatent/data/t3/output/disengagement.txt', 'w') as outfile:
+    for fname in filenames:
+        with open(fname) as infile:
+            for line in infile:
+                outfile.write(line)
+
+filenames = ['results-disengagement0.val', 'results-disengagement1.val', 'results-disengagement2.val', 'results-disengagement3.val','results-disengagement4.val','results-disengagement5.val','results-disengagement6.val','results-disengagement7.val','results-disengagement8.val','results-disengagement9.val']
+with open('/linqshomes/artir/Doctorate/workspace/MOOCLatent/data/t3/output/disengagement.txt', 'w') as outfile:
+    for fname in filenames:
+        with open(fname) as infile:
+            for line in infile:
+                outfile.write(line)
+
+filenames = ['results-performance0.val', 'results-performance1.val', 'results-performance2.val', 'results-performance3.val','results-performance4.val','results-performance5.val','results-performance6.val','results-performance7.val','results-performance8.val','results-performance9.val']
+with open('/linqshomes/artir/Doctorate/workspace/MOOCLatent/data/t3/output/performance.txt', 'w') as outfile:
+    for fname in filenames:
+        with open(fname) as infile:
+            for line in infile:
+                outfile.write(line)
+
+filenames = ['results-engagement-active0.val', 'results-engagement-active1.val', 'results-engagement-active2.val', 'results-engagement-active3.val','results-engagement-active4.val','results-engagement-active5.val','results-engagement-active6.val','results-engagement-active7.val','results-engagement-active8.val','results-engagement-active9.val']
+with open('/linqshomes/artir/Doctorate/workspace/MOOCLatent/data/t3/output/engagement-active.txt', 'w') as outfile:
+    for fname in filenames:
+        with open(fname) as infile:
+            for line in infile:
+                outfile.write(line)
+
+filenames = ['results-engagement-passive0.val', 'results-engagement-passive1.val', 'results-engagement-passive2.val', 'results-engagement-passive3.val','results-engagement-passive4.val','results-engagement-passive5.val','results-engagement-passive6.val','results-engagement-passive7.val','results-engagement-passive8.val','results-engagement-passive9.val']
+with open('/linqshomes/artir/Doctorate/workspace/MOOCLatent/data/t3/output/engagement-passive.txt', 'w') as outfile:
+    for fname in filenames:
+        with open(fname) as infile:
+            for line in infile:
+                outfile.write(line)

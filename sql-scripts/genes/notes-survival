@@ -1,0 +1,26 @@
+lectureSubmitted:
+
+70 deadlines in all, 38 deadlines leaving duplicates out (35 or 38?)
+
+INTO OUTFILE '/tmp/ontime.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'
+
+select user_id, ontimeCount/70 as perc from (select user_id, CAST(count(*) AS DECIMAL(10,5)) AS ontimeCount from (select user_id, item_id, count(*) as count from lecture_metadata qm JOIN lecture_submission_metadata qsm ON qm.id = qsm.item_id JOIN hash_mapping hm ON qsm.anon_user_id = hm.anon_user_id where DATE(FROM_UNIXTIME(submission_time)) <= DATE(FROM_UNIXTIME(hard_close_time)) group by user_id, item_id) a group by user_id) b;
+
+ INTO OUTFILE '/tmp/submitted.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'
+
+select user_id, ontimeCount/70 as perc  from (select user_id, CAST(count(*) AS DECIMAL(10,5)) AS ontimeCount from (select user_id, item_id, count(*) as count from lecture_metadata qm JOIN lecture_submission_metadata qsm ON qm.id = qsm.item_id JOIN hash_mapping hm ON qsm.anon_user_id = hm.anon_user_id group by user_id, item_id) a group by user_id) b;
+
+performance:
+
+select user_id, "1.0"  INTO OUTFILE '/tmp/performanceSurvivalTrue.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' from (select distinct anon_user_id from quiz_submission_metadata qs JOIN quiz_metadata qm ON qs.item_id = qm.id where qm.id IN (147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 177, 178)) a JOIN course_grades c ON a.anon_user_id = c.anon_user_id JOIN hash_mapping hm ON c.anon_user_id = hm.anon_user_id where normal_grade > 0;
+
+147 - 158, 177, 178
+
+INTO OUTFILE '/tmp/performanceSurvivalFalse.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'
+
+select user_id, "0.0" INTO OUTFILE '/tmp/performanceSurvivalFalse.txt' FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'from (select distinct anon_user_id from quiz_submission_metadata q JOIN  quiz_metadata qm ON q.item_id = qm.id where qm.id IN (147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 177, 178)) a RIGHT JOIN course_grades c ON a.anon_user_id = c.anon_user_id JOIN hash_mapping hm ON c.anon_user_id = hm.anon_user_id where normal_grade > 0 AND a.anon_user_id IS null;
+
+
+
+
+
